@@ -1,14 +1,18 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace wallpaper61
 {
-    public class BG61
+    public static class BG61
     {
+        static HttpClient client = new();
+
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool SystemParametersInfo(uint uiAction, uint uiParam, String pvParam, uint fWinIni);
@@ -19,11 +23,12 @@ namespace wallpaper61
 
         private const string fp1 = @"F:\src\wallpaper61\wp1.jpg";
 
-        public static void RunDisTing()
+        public static async Task RunDisTing()
         {
-            //SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, fp1, SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE);
+            await GetImage();
 
-            uint flags = 0;
+            //uint flags = 0;
+            uint flags = SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE;
             bool iswpok = SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, fp1, flags);
             if (!iswpok)
             {
@@ -31,6 +36,15 @@ namespace wallpaper61
             }
         }
 
-
+        public static async Task GetImage()
+        {
+            string? res = await client.GetStringAsync(new Uri("https://www.reddit.com/r/earthporn.json"));
+            dynamic earthpornJson = JsonConvert.DeserializeObject<dynamic>(res);
+            var posts = earthpornJson.data.children;
+            var chosen = Random.Shared.Next(0, posts.Count);
+            var imglink0 = posts[chosen].data["url"].ToString();
+            var imgbytes = await client.GetByteArrayAsync(imglink0);
+            File.WriteAllBytes(fp1, imgbytes);
+        }
     }
 }
