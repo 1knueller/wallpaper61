@@ -21,8 +21,8 @@ namespace wallpaper61
         private const uint SPIF_UPDATEINIFILE = 0x1;
         private const uint SPIF_SENDWININICHANGE = 0x2;
 
-        private const string fp1 = @"F:\src\wallpaper61\bin\wp1.jpg";
-        private const string fplog = @"F:\src\wallpaper61\bin\wplog.md";
+        private static string fp1 => Path.Combine(AppContext.BaseDirectory, "wp1.jpg");
+        private static string fplog => Path.Combine(AppContext.BaseDirectory, "wplog.md");
 
         public static async Task RunDisTing()
         {
