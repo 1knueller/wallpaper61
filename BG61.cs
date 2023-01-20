@@ -21,7 +21,8 @@ namespace wallpaper61
         private const uint SPIF_UPDATEINIFILE = 0x1;
         private const uint SPIF_SENDWININICHANGE = 0x2;
 
-        private const string fp1 = @"F:\src\wallpaper61\wp1.jpg";
+        private const string fp1 = @"F:\src\wallpaper61\bin\wp1.jpg";
+        private const string fplog = @"F:\src\wallpaper61\bin\wplog.md";
 
         public static async Task RunDisTing()
         {
@@ -41,10 +42,24 @@ namespace wallpaper61
             string? res = await client.GetStringAsync(new Uri("https://www.reddit.com/r/earthporn.json"));
             dynamic earthpornJson = JsonConvert.DeserializeObject<dynamic>(res);
             var posts = earthpornJson.data.children;
-            var chosen = Random.Shared.Next(0, posts.Count);
-            var imglink0 = posts[chosen].data["url"].ToString();
+            dynamic chosenpost = posts[Random.Shared.Next(0, posts.Count)];
+
+            // IMG
+            var imglink0 = chosenpost.data["url"].ToString();
             var imgbytes = await client.GetByteArrayAsync(imglink0);
             File.WriteAllBytes(fp1, imgbytes);
+
+            // LOG
+            var postid = chosenpost.data["id"].ToString();
+            var posttitle = chosenpost.data["title"].ToString();
+
+            var loginfo = $@"
+////////~~~~~~~~~~~
+{DateTime.Now}
+{postid}
+{string.Join("_", posttitle.Split(Path.GetInvalidFileNameChars()))}";
+
+            File.AppendAllText(fplog, loginfo);
         }
     }
 }
